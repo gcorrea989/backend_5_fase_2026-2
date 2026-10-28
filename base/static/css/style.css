@@ -1,0 +1,775 @@
+/* =============================================================================
+   ERP — folha de estilo base
+   -----------------------------------------------------------------------------
+   Organização em camadas: tokens -> reset -> layout -> componentes -> utilidades.
+   A ordem importa: componentes vêm depois do layout para que ninguém precise de
+   !important ou de seletores aninhados só para vencer especificidade.
+
+   Convenção de nomes: bloco__elemento--modificador (BEM enxuto). Escolhido em vez
+   de classes utilitárias porque aqui o HTML é gerado por template Django — manter
+   a semântica no CSS deixa o template legível para quem está aprendendo backend.
+   ========================================================================== */
+
+
+/* =============================================================================
+   1. TOKENS
+   Centralizar cor/espaço/raio em custom properties custa uma camada de
+   indireção, mas paga na manutenção: trocar a identidade do ERP inteiro vira
+   editar este bloco, e não caçar hex espalhado por 400 linhas.
+   ========================================================================== */
+:root {
+    /* Paleta: base neutra fria + um único acento (verde-petróleo).
+       Um acento só evita que o sistema vire um semáforo quando os módulos
+       de estoque, financeiro e fiscal chegarem. */
+    --cor-fundo:            #f4f5f7;
+    --cor-superficie:       #ffffff;
+    --cor-superficie-alt:   #f8f9fb;
+    --cor-borda:            #e3e7ec;
+    --cor-borda-forte:      #cdd4dd;
+
+    --cor-texto:            #16202c;
+    --cor-texto-suave:      #64748b;
+
+    --cor-marca:            #0f6e63;
+    --cor-marca-escura:     #0b4f47;
+    --cor-marca-clara:      #17a89a;
+    --cor-marca-lavada:     #e6f4f2;
+
+    --cor-topo:             #16202c;
+    --cor-topo-texto:       rgba(255, 255, 255, 0.72);
+
+    /* Vermelho de erro: único desvio do acento único do sistema. Erro é a
+       exceção em que cor precisa ser semântica, não decorativa. */
+    --cor-erro:             #b42318;
+    --cor-erro-lavada:      #fef3f2;
+    --cor-erro-borda:       #fecdca;
+
+    /* Escala de espaço em múltiplos de 4px. Números arbitrários (13px, 27px)
+       são o que faz um layout parecer "quase certo" sem ninguém saber por quê. */
+    --esp-1: 0.25rem;
+    --esp-2: 0.5rem;
+    --esp-3: 0.75rem;
+    --esp-4: 1rem;
+    --esp-5: 1.5rem;
+    --esp-6: 2rem;
+    --esp-7: 3rem;
+
+    --raio-sm:   6px;
+    --raio-md:   10px;
+    --raio-lg:   14px;
+    --raio-full: 999px;
+
+    /* Sombras curtas e de baixa opacidade: em tela de trabalho, sombra forte
+       cansa. A profundidade aqui é sugerida mais pela borda do que pelo blur. */
+    --sombra-1: 0 1px 2px rgba(22, 32, 44, 0.05);
+    --sombra-2: 0 4px 12px rgba(22, 32, 44, 0.08);
+
+    --transicao: 140ms ease;
+
+    /* Stack de fontes do sistema: zero requisição de rede. Em laboratório sem
+       internet (ou com proxy da instituição), webfont externa simplesmente não
+       carrega e o layout muda no meio da aula. */
+    --fonte: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+             "Helvetica Neue", Arial, sans-serif;
+    --fonte-mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+
+    --largura-max: 1180px;
+}
+
+
+/* =============================================================================
+   2. RESET MÍNIMO
+   Só o necessário para eliminar diferenças entre navegadores. Um reset completo
+   (tipo Eric Meyer) zeraria estilos de <h1>, <ul> etc. que aqui ainda são úteis.
+   ========================================================================== */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto);
+    font-family: var(--fonte);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, p, dl, dd, figure {
+    margin: 0;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* :focus-visible em vez de :focus — o anel aparece para quem navega por teclado
+   e some para quem usa mouse. Remover o outline sem repor nada quebra
+   acessibilidade e é o erro mais comum em CSS "limpo". */
+:focus-visible {
+    outline: 2px solid var(--cor-marca-clara);
+    outline-offset: 2px;
+    border-radius: var(--raio-sm);
+}
+
+/* Respeita quem configurou o SO para reduzir animação (enjoo, vestibular). */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+    }
+}
+
+
+/* =============================================================================
+   3. TOPO / NAVEGAÇÃO GLOBAL
+   Este bloco inteiro acompanha o header quando ele virar um partial.
+   ========================================================================== */
+.topo {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background-color: var(--cor-topo);
+    color: #fff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.topo__interno {
+    max-width: var(--largura-max);
+    margin-inline: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--esp-5);
+    padding: var(--esp-3) var(--esp-5);
+}
+
+.marca {
+    display: flex;
+    align-items: center;
+    gap: var(--esp-3);
+    flex: none;
+}
+
+/* O único elemento realmente "colorido" da interface. Concentrar a identidade
+   aqui permite que todo o resto da tela fique quieto e os dados apareçam. */
+.marca__simbolo {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: var(--raio-md);
+    background-color: var(--cor-marca-clara);
+    color: #06322c;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.marca__nome {
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.navegacao {
+    display: flex;
+    gap: var(--esp-1);
+    /* Em telas estreitas a barra rola lateralmente em vez de quebrar linha ou
+       virar menu hambúrguer — menos JS para manter num projeto de backend. */
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.navegacao::-webkit-scrollbar {
+    display: none;
+}
+
+.navegacao__link {
+    padding: var(--esp-2) var(--esp-3);
+    border-radius: var(--raio-sm);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--cor-topo-texto);
+    white-space: nowrap;
+    transition: background-color var(--transicao), color var(--transicao);
+}
+
+.navegacao__link:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Estado ativo marcado por cor + peso, não só por cor: quem tem baixa visão ou
+   daltonismo continua identificando a página atual. */
+.navegacao__link.esta-ativo {
+    color: #fff;
+    font-weight: 600;
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.usuario {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--esp-3);
+    flex: none;
+}
+
+.usuario__avatar {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--raio-full);
+    background-color: rgba(255, 255, 255, 0.14);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.usuario__nome {
+    font-size: 0.82rem;
+    color: var(--cor-topo-texto);
+}
+
+
+/* =============================================================================
+   4. LAYOUT DE CONTEÚDO
+   ========================================================================== */
+.conteudo {
+    max-width: var(--largura-max);
+    margin-inline: auto;
+    padding: var(--esp-6) var(--esp-5) var(--esp-7);
+}
+
+.pagina__cabecalho {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--esp-4);
+    padding-bottom: var(--esp-4);
+    margin-bottom: var(--esp-5);
+    border-bottom: 1px solid var(--cor-borda);
+}
+
+.pagina__titulo {
+    font-size: 1.5rem;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.pagina__resumo {
+    margin-top: var(--esp-1);
+    font-size: 0.875rem;
+    color: var(--cor-texto-suave);
+}
+
+.pagina__acoes {
+    margin-left: auto;
+    display: flex;
+    gap: var(--esp-2);
+}
+
+
+/* =============================================================================
+   5. COMPONENTES
+   ========================================================================== */
+
+/* --- Botão ---------------------------------------------------------------- */
+.botao {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--esp-2);
+    padding: 0.55rem var(--esp-4);
+    border: 1px solid transparent;
+    border-radius: var(--raio-md);
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color var(--transicao), border-color var(--transicao);
+}
+
+.botao--primario {
+    background-color: var(--cor-marca);
+    color: #fff;
+    box-shadow: var(--sombra-1);
+}
+
+.botao--primario:hover {
+    background-color: var(--cor-marca-escura);
+}
+
+.botao--neutro {
+    background-color: var(--cor-superficie);
+    border-color: var(--cor-borda-forte);
+    color: var(--cor-texto);
+}
+
+.botao--neutro:hover {
+    background-color: var(--cor-superficie-alt);
+}
+
+.botao__icone {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+}
+
+/* --- Selo de contagem ----------------------------------------------------- */
+.contagem {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--esp-1);
+    padding: var(--esp-1) var(--esp-3);
+    border-radius: var(--raio-full);
+    background-color: var(--cor-marca-lavada);
+    color: var(--cor-marca-escura);
+    font-size: 0.78rem;
+    font-weight: 600;
+    /* tabular-nums trava a largura dos dígitos: a pílula não "pula" quando o
+       número passa de 9 para 10 depois de um cadastro. */
+    font-variant-numeric: tabular-nums;
+}
+
+/* --- Situação (ativo / inativo) ------------------------------------------- */
+.situacao {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--esp-2);
+    padding: 0.15rem var(--esp-2);
+    border-radius: var(--raio-full);
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.situacao::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: var(--raio-full);
+    background-color: currentColor;
+}
+
+.situacao--ativo {
+    color: var(--cor-marca);
+    background-color: var(--cor-marca-lavada);
+}
+
+
+/* =============================================================================
+   6. LISTAGEM DE CLIENTES
+   ========================================================================== */
+
+/* auto-fill + minmax substitui a largura fixa de 250px do flex-wrap: os cards
+   passam a preencher a linha inteira em qualquer viewport, sem media query e
+   sem sobrar buraco à direita. O custo é perder o alinhamento "natural" à
+   esquerda quando há poucos itens — aceitável numa listagem. */
+.grid-clientes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--esp-4);
+}
+
+.card-cliente {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--cor-superficie);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-lg);
+    padding: var(--esp-4);
+    box-shadow: var(--sombra-1);
+    transition: border-color var(--transicao), box-shadow var(--transicao);
+}
+
+/* Hover discreto, sem deslocamento: o card não é clicável ainda, então mover o
+   elemento prometeria uma interação que não existe. */
+.card-cliente:hover {
+    border-color: var(--cor-borda-forte);
+    box-shadow: var(--sombra-2);
+}
+
+.card-cliente__topo {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--esp-3);
+    margin-bottom: var(--esp-4);
+}
+
+/* Monograma no lugar de foto: o ERP não tem upload de imagem e provavelmente
+   nunca vai ter para pessoa jurídica. A inicial dá ancoragem visual na
+   varredura da lista sem inventar um campo no modelo. */
+.card-cliente__monograma {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--raio-md);
+    background-color: var(--cor-marca-lavada);
+    color: var(--cor-marca-escura);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.card-cliente__identificacao {
+    min-width: 0; /* permite que o nome longo encolha dentro do flex */
+}
+
+.card-cliente__nome {
+    font-size: 0.98rem;
+    font-weight: 620;
+    line-height: 1.3;
+    /* Razão social costuma ser longa e sem espaços úteis ("INDUSTRIA...LTDA"):
+       sem isso o texto vaza do card. */
+    overflow-wrap: anywhere;
+}
+
+.card-cliente__situacao {
+    margin-top: var(--esp-1);
+}
+
+.card-cliente__dados {
+    display: grid;
+    gap: var(--esp-3);
+    padding-top: var(--esp-3);
+    border-top: 1px solid var(--cor-borda);
+    margin-top: auto; /* alinha a base dos cards mesmo com nomes de alturas diferentes */
+}
+
+.campo__rotulo {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--cor-texto-suave);
+}
+
+.campo__valor {
+    display: block;
+    font-size: 0.875rem;
+    overflow-wrap: anywhere;
+}
+
+/* CNPJ e telefone em tabular: as colunas de dígitos se alinham entre os cards,
+   o que ajuda na conferência visual. */
+.campo__valor--numerico {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+}
+
+.campo__valor--ausente {
+    color: var(--cor-texto-suave);
+}
+
+a.campo__valor:hover {
+    color: var(--cor-marca);
+    text-decoration: underline;
+}
+
+
+/* =============================================================================
+   7. ESTADO VAZIO
+   ========================================================================== */
+
+/* grid-column: 1 / -1 faz o bloco ocupar a linha toda. Sem isso ele viraria uma
+   coluna de 260px perdida no canto esquerdo do grid. */
+.estado-vazio {
+    grid-column: 1 / -1;
+    display: grid;
+    justify-items: center;
+    gap: var(--esp-3);
+    padding: var(--esp-7) var(--esp-5);
+    text-align: center;
+    border: 1px dashed var(--cor-borda-forte);
+    border-radius: var(--raio-lg);
+    background-color: var(--cor-superficie-alt);
+}
+
+.estado-vazio__icone {
+    width: 28px;
+    height: 28px;
+    stroke: var(--cor-texto-suave);
+    fill: none;
+    stroke-width: 1.5;
+}
+
+.estado-vazio__titulo {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.estado-vazio__texto {
+    max-width: 38ch; /* linha curta: bloco centralizado fica ilegível se for largo */
+    font-size: 0.875rem;
+    color: var(--cor-texto-suave);
+}
+
+
+/* =============================================================================
+   8. FORMULÁRIOS
+   -----------------------------------------------------------------------------
+   Nomes de classe batem com os definidos nos widgets do forms.py. A alternativa
+   seria estilizar por seletor de elemento (input, select), que dispensaria os
+   attrs no Python — mas aí qualquer input de busca ou filtro futuro herdaria o
+   visual de campo de cadastro sem pedir.
+   ========================================================================== */
+
+.formulario {
+    background-color: var(--cor-superficie);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-lg);
+    box-shadow: var(--sombra-1);
+    padding: var(--esp-5);
+    /* Formulário largo demais obriga o olho a varrer a tela inteira entre o
+       rótulo e o campo seguinte. Limitar a largura é regra de legibilidade,
+       não de estética. */
+    max-width: 780px;
+}
+
+/* auto-fit encaixa dois campos por linha em desktop e empilha no celular sem
+   media query. Campos que pedem linha inteira usam o modificador --largo. */
+.formulario__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: var(--esp-4) var(--esp-4);
+}
+
+.grupo-campo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--esp-2);
+    min-width: 0;
+}
+
+.grupo-campo--largo {
+    grid-column: 1 / -1;
+}
+
+.campo__label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--cor-texto);
+}
+
+/* display:block porque no grupo do checkbox a ajuda fica dentro de uma div
+   comum, não de um container flex — como <span> ela colaria no rótulo. */
+.campo__ajuda {
+    display: block;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: var(--cor-texto-suave);
+}
+
+
+/* --- Controles ------------------------------------------------------------
+   input, select e textarea compartilham a mesma base. Agrupar numa lista de
+   seletores evita que o select "quase" se pareça com o input — desalinhamento
+   de 1px entre campos irmãos é o que faz um formulário parecer amador.
+   ------------------------------------------------------------------------- */
+.campo__input,
+.campo__select,
+.campo__textarea {
+    width: 100%;
+    padding: 0.6rem var(--esp-3);
+    border: 1px solid var(--cor-borda-forte);
+    border-radius: var(--raio-md);
+    background-color: var(--cor-superficie);
+    color: var(--cor-texto);
+    /* O navegador NÃO herda fonte em elementos de formulário: sem esta linha o
+       campo sai em Times 13px no meio de uma página em sans-serif. */
+    font-family: inherit;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    transition: border-color var(--transicao), box-shadow var(--transicao);
+}
+
+.campo__input::placeholder,
+.campo__textarea::placeholder {
+    color: #9aa5b1;
+}
+
+/* Anel de foco desenhado com box-shadow em vez do outline padrão: ele respeita
+   o border-radius do campo. O outline fica como fallback em navegador que
+   ignore box-shadow e para o modo de alto contraste do Windows. */
+.campo__input:focus,
+.campo__select:focus,
+.campo__textarea:focus {
+    outline: 2px solid transparent;
+    border-color: var(--cor-marca);
+    box-shadow: 0 0 0 3px var(--cor-marca-lavada);
+}
+
+.campo__input--numerico {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Seta própria no select: appearance:none remove o controle nativo, então ela
+   precisa ser redesenhada. A cor vai fixa no data URI porque custom property
+   não resolve dentro de url() — se a paleta mudar, este hex muda junto. */
+.campo__select {
+    appearance: none;
+    padding-right: var(--esp-6);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--esp-3) center;
+    background-size: 16px;
+    cursor: pointer;
+}
+
+
+/* --- Checkbox -------------------------------------------------------------
+   accent-color pinta o controle nativo com a cor da marca em uma linha. A
+   alternativa (esconder o input e desenhar um quadrado falso) dá controle
+   total sobre o visual, mas obriga a reimplementar foco, estado indeterminado
+   e leitura por leitor de tela.
+   ------------------------------------------------------------------------- */
+.grupo-campo--checkbox {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--esp-3);
+    padding: var(--esp-3) var(--esp-4);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-md);
+    background-color: var(--cor-superficie-alt);
+}
+
+.campo__checkbox {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: var(--cor-marca);
+    cursor: pointer;
+}
+
+.grupo-campo--checkbox .campo__label {
+    cursor: pointer;
+}
+
+
+/* --- Campo obrigatório ----------------------------------------------------
+   A classe vem de required_css_class no ProdutoForm e chega ao HTML via
+   {{ form.campo.css_classes }}. Marcar o obrigatório no Python mantém uma
+   única fonte de verdade: mudar required=False no model apaga o asterisco
+   sozinho, sem ninguém lembrar de editar o template.
+   ------------------------------------------------------------------------- */
+.grupo-campo.eh-obrigatorio .campo__label::after {
+    content: "*";
+    margin-left: 0.2em;
+    color: var(--cor-erro);
+    font-weight: 700;
+}
+
+
+/* --- Estado de erro -------------------------------------------------------
+   Cuidado com especificidade: .grupo-campo.tem-erro .campo__input tem peso
+   (0,3,0) e venceria .campo__input:focus (0,2,0) independentemente da ordem no
+   arquivo. Por isso o foco do campo com erro é reescrito explicitamente abaixo
+   — e mantém o vermelho, porque o campo continua inválido enquanto é editado.
+   ------------------------------------------------------------------------- */
+.grupo-campo.tem-erro .campo__input,
+.grupo-campo.tem-erro .campo__select,
+.grupo-campo.tem-erro .campo__textarea {
+    border-color: var(--cor-erro);
+    background-color: var(--cor-erro-lavada);
+}
+
+.grupo-campo.tem-erro .campo__input:focus,
+.grupo-campo.tem-erro .campo__select:focus,
+.grupo-campo.tem-erro .campo__textarea:focus {
+    border-color: var(--cor-erro);
+    box-shadow: 0 0 0 3px var(--cor-erro-borda);
+}
+
+/* O Django renderiza {{ form.campo.errors }} como <ul class="errorlist">. Sem
+   uma regra para essa classe o erro aparece com bullet e recuo de lista — é o
+   que mais denuncia formulário não estilizado. Estilizar .errorlist resolve
+   todos os formulários do ERP de uma vez; a alternativa seria passar uma
+   ErrorList customizada em cada form. */
+.errorlist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--esp-1);
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--cor-erro);
+}
+
+/* Erros gerais (clean()) não pertencem a nenhum campo: viram um aviso no topo
+   do formulário, com barra lateral para separá-los do conteúdo. */
+.formulario__alerta {
+    margin-bottom: var(--esp-5);
+    padding: var(--esp-3) var(--esp-4);
+    border: 1px solid var(--cor-erro-borda);
+    border-left-width: 3px;
+    border-radius: var(--raio-md);
+    background-color: var(--cor-erro-lavada);
+}
+
+.formulario__alerta .errorlist {
+    gap: var(--esp-2);
+}
+
+
+/* --- Rodapé de ações ------------------------------------------------------ */
+.formulario__rodape {
+    display: flex;
+    gap: var(--esp-3);
+    margin-top: var(--esp-5);
+    padding-top: var(--esp-5);
+    border-top: 1px solid var(--cor-borda);
+}
+
+
+/* =============================================================================
+   9. AJUSTES PARA TELAS PEQUENAS
+   Um único breakpoint. O grid já se vira sozinho; aqui só tratamos o que ele
+   não resolve (barra de topo e ações do cabeçalho).
+   ========================================================================== */
+@media (max-width: 640px) {
+    .topo__interno {
+        gap: var(--esp-3);
+        padding-inline: var(--esp-4);
+    }
+
+    .usuario__nome {
+        display: none;
+    }
+
+    .conteudo {
+        padding: var(--esp-5) var(--esp-4) var(--esp-6);
+    }
+
+    .pagina__acoes {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .pagina__acoes .botao {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .formulario {
+        padding: var(--esp-4);
+    }
+
+    /* Botões de rodapé em coluna invertida: a ação primária fica acima e mais
+       perto do polegar, e "Cancelar" deixa de ser o alvo fácil. */
+    .formulario__rodape {
+        flex-direction: column-reverse;
+    }
+
+    .formulario__rodape .botao {
+        justify-content: center;
+    }
+}

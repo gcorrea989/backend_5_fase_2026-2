@@ -1,0 +1,34 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    {% comment %}
+        Sem esta meta o celular renderiza a página em ~980px e aplica zoom-out:
+        todo o CSS responsivo seria ignorado.
+    {% endcomment %}
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{% block titulo %}ERP Sistema{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    {% comment %}
+        Ponto de extensão para CSS específico de uma tela (ex.: um dashboard com
+        gráfico). Evita que o style.css global cresça com regras usadas em uma
+        página só.
+    {% endcomment %}
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% include "partials/_header.html" %}
+    
+    <main class="conteudo">
+        {% block conteudo_principal %}{% endblock %}
+    </main>
+
+    {# Scripts no fim do body: o HTML já foi pintado quando o JS começa a baixar. #}
+    {% block extra_js %}{% endblock %}
+
+</body>
+</html>

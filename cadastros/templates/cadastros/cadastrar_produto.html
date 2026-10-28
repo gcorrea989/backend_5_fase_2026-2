@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block titulo %}Cadastrar produto - ERP{% endblock %}
+
+{% block conteudo_principal %}
+
+<div class="pagina__cabecalho">
+    <div>
+        <h1 class="pagina__titulo">{{ titulo_pagina }}</h1>
+        <p class="pagina__resumo">Os campos marcados com asterisco são obrigatórios.</p>
+    </div>
+</div>
+
+<form method="POST" action="{% url 'cadastros:cadastrar_produto' %}" class="formulario" novalidate>
+    {% csrf_token %}
+
+    {% comment %}
+        non_field_errors reúne o que veio do clean() do form — regras que
+        cruzam mais de um campo, como "ativo sem estoque". Elas não pertencem a
+        nenhum input, então vão num aviso no topo em vez de ao lado de um campo.
+
+        O atributo novalidate desliga a validação nativa do navegador. Os
+        atributos min/step continuam úteis (teclado numérico no celular, setas
+        do input), mas a mensagem do navegador é genérica, não traduzida de
+        forma consistente e não conhece as regras do clean(). Melhor deixar o
+        Django ser a única voz de erro. Para manter a validação do navegador,
+        basta remover o novalidate.
+    {% endcomment %}
+    {% if form.non_field_errors %}
+        <div class="formulario__alerta" role="alert">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <div class="formulario__grid">
+
+        {% comment %}
+            {{ form.campo.css_classes }} devolve as classes definidas em
+            error_css_class / required_css_class no ProdutoForm. Vale mais que um
+            {% if form.campo.errors %}tem-erro{% endif %} repetido seis vezes:
+            a regra fica no Python, e o template só a consome.
+        {% endcomment %}
+
+        {# NOME — linha inteira: razão de produto costuma ser longa #}
+        <div class="grupo-campo grupo-campo--largo {{ form.nome.css_classes }}">
+            <label for="{{ form.nome.id_for_label }}" class="campo__label">{{ form.nome.label }}</label>
+            {{ form.nome }}
+            {{ form.nome.errors }}
+        </div>
+
+        {# SLUG #}
+        <div class="grupo-campo {{ form.slug.css_classes }}">
+            <label for="{{ form.slug.id_for_label }}" class="campo__label">{{ form.slug.label }}</label>
+            {{ form.slug }}
+            {% if form.slug.help_text %}
+                <span class="campo__ajuda">{{ form.slug.help_text }}</span>
+            {% endif %}
+            {{ form.slug.errors }}
+        </div>
+
+        {# CATEGORIA #}
+        <div class="grupo-campo {{ form.categoria.css_classes }}">
+            <label for="{{ form.categoria.id_for_label }}" class="campo__label">{{ form.categoria.label }}</label>
+            {{ form.categoria }}
+            {{ form.categoria.errors }}
+        </div>
+
+        {# PREÇO #}
+        <div class="grupo-campo {{ form.preco.css_classes }}">
+            <label for="{{ form.preco.id_for_label }}" class="campo__label">{{ form.preco.label }}</label>
+            {{ form.preco }}
+            {{ form.preco.errors }}
+        </div>
+
+        {# ESTOQUE #}
+        <div class="grupo-campo {{ form.quantidade_estoque.css_classes }}">
+            <label for="{{ form.quantidade_estoque.id_for_label }}" class="campo__label">{{ form.quantidade_estoque.label }}</label>
+            {{ form.quantidade_estoque }}
+            {{ form.quantidade_estoque.errors }}
+        </div>
+
+        {% comment %}
+            O checkbox inverte a ordem rótulo/campo e por isso tem um grupo
+            próprio. A classe --largo garante que ele não fique espremido ao
+            lado de um input, onde a caixa de 18px some visualmente.
+        {% endcomment %}
+        <div class="grupo-campo grupo-campo--checkbox grupo-campo--largo {{ form.situacao.css_classes }}">
+            {{ form.situacao }}
+            <div>
+                <label for="{{ form.situacao.id_for_label }}" class="campo__label">{{ form.situacao.label }}</label>
+                {% if form.situacao.help_text %}
+                    <span class="campo__ajuda">{{ form.situacao.help_text }}</span>
+                {% endif %}
+                {{ form.situacao.errors }}
+            </div>
+        </div>
+
+    </div>
+
+    <div class="formulario__rodape">
+        <button type="submit" class="botao botao--primario">Salvar produto</button>
+        <a href="{% url 'cadastros:demo_orm' %}" class="botao botao--neutro">Cancelar</a>
+    </div>
+</form>
+
+{% endblock %}

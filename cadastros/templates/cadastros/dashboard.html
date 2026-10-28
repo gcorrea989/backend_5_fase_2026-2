@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Dashboard - ERP{% endblock %}
+
+{% block conteudo_principal %}
+
+    <!-- Reutilizando as classes de cabeçalho do seu novo padrão -->
+    <div class="pagina__cabecalho">
+        <div>
+            <h1 class="pagina__titulo">Visão Geral</h1>
+            <p class="pagina__resumo">Indicadores principais do sistema.</p>
+        </div>
+    </div>
+
+    <!-- 
+        Utilizando CSS Grid nativo com as suas variáveis de espaçamento.
+        O auto-fit e minmax garantem a responsividade sem precisar de media queries extras.
+    -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--esp-4);">
+        
+        <!-- Card: Clientes -->
+        <article style="background-color: var(--cor-superficie); border: 1px solid var(--cor-borda); border-radius: var(--raio-lg); padding: var(--esp-5); box-shadow: var(--sombra-1); transition: box-shadow var(--transicao);">
+            <h2 style="font-size: 0.875rem; font-weight: 600; color: var(--cor-texto-suave); text-transform: uppercase; letter-spacing: 0.05em;">
+                Clientes Ativos
+            </h2>
+            <p style="font-size: 2.5rem; font-weight: 700; color: var(--cor-marca); margin-top: var(--esp-2); line-height: 1; font-variant-numeric: tabular-nums;">
+                {{ total_clientes|default:"0" }}
+            </p>
+        </article>
+
+        <!-- Card: Produtos -->
+        <article style="background-color: var(--cor-superficie); border: 1px solid var(--cor-borda); border-radius: var(--raio-lg); padding: var(--esp-5); box-shadow: var(--sombra-1); transition: box-shadow var(--transicao);">
+            <h2 style="font-size: 0.875rem; font-weight: 600; color: var(--cor-texto-suave); text-transform: uppercase; letter-spacing: 0.05em;">
+                Produtos Ativos
+            </h2>
+            <p style="font-size: 2.5rem; font-weight: 700; color: var(--cor-marca-escura); margin-top: var(--esp-2); line-height: 1; font-variant-numeric: tabular-nums;">
+                {{ total_produtos|default:"0" }}
+            </p>
+        </article>
+
+        <!-- Card: Categorias -->
+        <article style="background-color: var(--cor-superficie); border: 1px solid var(--cor-borda); border-radius: var(--raio-lg); padding: var(--esp-5); box-shadow: var(--sombra-1); transition: box-shadow var(--transicao);">
+            <h2 style="font-size: 0.875rem; font-weight: 600; color: var(--cor-texto-suave); text-transform: uppercase; letter-spacing: 0.05em;">
+                Categorias
+            </h2>
+            <p style="font-size: 2.5rem; font-weight: 700; color: var(--cor-texto); margin-top: var(--esp-2); line-height: 1; font-variant-numeric: tabular-nums;">
+                {{ total_categorias|default:"0" }}
+            </p>
+        </article>
+
+    </div>
+
+{% endblock %}

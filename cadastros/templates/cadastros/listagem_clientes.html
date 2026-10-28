@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Clientes - ERP{% endblock %}
+
+{% block conteudo_principal %}
+
+    <div class="pagina__cabecalho">
+        <div>
+            <h1 class="pagina__titulo">Clientes</h1>
+            <p class="pagina__resumo">Cadastros ativos disponíveis para faturamento.</p>
+        </div>
+
+        {% comment %}
+            O filtro length itera o queryset em memória. Como o laço abaixo consome
+            a mesma lista, o Django reaproveita o cache e não há consulta extra. Se
+            esta contagem aparecesse numa tela que NÃO lista os registros, o certo
+            seria mandar clientes.count() da view — o COUNT(*) roda no banco e não
+            carrega mil objetos para contar mil objetos.
+        {% endcomment %}
+        {% if clientes %}
+            <span class="contagem">{{ clientes|length }} ativo{{ clientes|length|pluralize }}</span>
+        {% endif %}
+
+        <div class="pagina__acoes">
+            <a class="botao botao--primario" href="#">
+                <svg class="botao__icone" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14" stroke-linecap="round"/>
+                </svg>
+                Cadastrar cliente
+            </a>
+        </div>
+    </div>
+
+    <div class="grid-clientes">
+        {% for cliente in clientes %}
+
+            <article class="card-cliente">
+
+                <div class="card-cliente__topo">
+                    {% comment %}
+                        O filtro first pega o primeiro caractere da string e upper
+                        normaliza o cadastro digitado em minúsculas. Fazer isso no
+                        template mantém o model livre de um campo só para exibição.
+                    {% endcomment %}
+                    <span class="card-cliente__monograma" aria-hidden="true">
+                        {{ cliente.nome|first|upper }}
+                    </span>
+
+                    <div class="card-cliente__identificacao">
+                        <h2 class="card-cliente__nome">{{ cliente.nome }}</h2>
+                        <p class="card-cliente__situacao">
+                            <span class="situacao situacao--ativo">Ativo</span>
+                        </p>
+                    </div>
+                </div>
+
+                {% comment %}
+                    A dupla dt/dd dentro de uma dl é a estrutura correta para pares
+                    rótulo/valor: um leitor de tela anuncia "CNPJ: 00.000.000/0001-00"
+                    em vez de ler dois textos soltos, como aconteceria com p + strong.
+                {% endcomment %}
+                <dl class="card-cliente__dados">
+
+                    <div class="campo">
+                        <dt class="campo__rotulo">CNPJ</dt>
+                        <dd class="campo__valor campo__valor--numerico">{{ cliente.cnpj }}</dd>
+                    </div>
+
+                    <div class="campo">
+                        <dt class="campo__rotulo">E-mail</dt>
+                        <dd>
+                            <a class="campo__valor" href="mailto:{{ cliente.email }}">{{ cliente.email }}</a>
+                        </dd>
+                    </div>
+
+                    <div class="campo">
+                        <dt class="campo__rotulo">Telefone</dt>
+                        <dd>
+                            {% comment %}
+                                Aqui o if substitui o filtro default:"Não informado".
+                                O filtro resolve o texto, mas devolve uma string que
+                                fica visualmente idêntica a um telefone real. Com o if
+                                dá para marcar o valor ausente com uma classe própria
+                                e diferenciá-lo.
+                            {% endcomment %}
+                            {% if cliente.telefone %}
+                                <span class="campo__valor campo__valor--numerico">{{ cliente.telefone }}</span>
+                            {% else %}
+                                <span class="campo__valor campo__valor--ausente">Não informado</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+
+                </dl>
+
+            </article>
+
+        {% empty %}
+
+            {% comment %}
+                Este bloco vive dentro do .grid-clientes, ou seja, é um item do grid
+                — daí o grid-column: 1 / -1 no CSS para ele ocupar a largura toda.
+            {% endcomment %}
+            <div class="estado-vazio">
+                <svg class="estado-vazio__icone" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 7a2 2 0 0 1 2-2h4l2 3h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"
+                          stroke-linejoin="round"/>
+                </svg>
+                <p class="estado-vazio__titulo">Nenhum cliente ativo</p>
+                <p class="estado-vazio__texto">
+                    Cadastre o primeiro cliente para que ele apareça nesta lista e
+                    fique disponível nos pedidos.
+                </p>
+                <a class="botao botao--neutro" href="#">Cadastrar cliente</a>
+            </div>
+
+        {% endfor %}
+    </div>
+
+{% endblock %}

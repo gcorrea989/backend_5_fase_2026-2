@@ -1,0 +1,57 @@
+
+   {% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ titulo_pagina }}</title>
+    
+    <!-- Substituindo o CSS interno pelo nosso arquivo externo: -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <h1>Entendendo o ORM do Django</h1>
+
+    <div class="bloco">
+        <h2>1. Todos os Produtos</h2>
+        <p>Comando: <code>Produto.objects.all()</code></p>
+        <ul>
+            {% for p in todos %}
+                <li>{{ p.nome }} - R$ {{ p.preco }} (Estoque: {{ p.quantidade_estoque }})</li>
+            {% empty %}
+                <li>Nenhum produto cadastrado.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="bloco">
+        <h2>2. Produtos em Estoque (> 0)</h2>
+        <p>Comando: <code>Produto.objects.filter(quantidade_estoque__gt=0)</code></p>
+        <ul>
+            {% for p in em_estoque %}
+                <li>{{ p.nome }} - Estoque: {{ p.quantidade_estoque }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="bloco">
+        <h2>3. Produtos Baratos (<= R$ 50)</h2>
+        <p>Comando: <code>Produto.objects.filter(preco__lte=50.00)</code></p>
+        <ul>
+            {% for p in baratos %}
+                <li>{{ p.nome }} - R$ {{ p.preco }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    <div class="bloco">
+        <h2>4. Navegando por Relacionamentos (Filtro por Categoria)</h2>
+        <p>Comando: <code>Produto.objects.filter(categoria__nome='Eletrônicos')</code></p>
+        <ul>
+            {% for p in por_categoria %}
+                <li>{{ p.nome }} - Categoria: {{ p.categoria.nome }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>
