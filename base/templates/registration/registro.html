@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block titulo %}Criar Conta - Sistema ERP{% endblock %}
+
+{% block conteudo_principal %}
+<div class="pagina__cabecalho">
+    <h1 class="pagina__titulo">Criar Nova Conta</h1>
+</div>
+
+<form method="post" class="formulario" style="max-width: 450px; margin: 0 auto;">
+    {% csrf_token %}
+    
+    {% if form.non_field_errors %}
+    <div class="formulario__alerta">
+        {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    <div class="formulario__grid" style="grid-template-columns: 1fr;">
+        {% for campo in form %}
+        <div class="grupo-campo {% if campo.errors %}tem-erro{% endif %}">
+            <label class="campo__label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+            
+            {{ campo }}
+            
+            {% if campo.help_text %}
+                <span class="campo__ajuda">{{ campo.help_text }}</span>
+            {% endif %}
+            
+            {% if campo.errors %}
+                <ul class="errorlist">
+                    {% for erro in campo.errors %}<li>{{ erro }}</li>{% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="formulario__rodape">
+        <button type="submit" class="botao botao--primario" style="width: 100%; justify-content: center;">Finalizar Cadastro</button>
+    </div>
+    
+    <div style="text-align: center; margin-top: var(--esp-4);">
+        <a href="{% url 'login' %}" class="campo__ajuda" style="color: var(--cor-marca);">Já tem uma conta? Faça login</a>
+    </div>
+</form>
+{% endblock %}

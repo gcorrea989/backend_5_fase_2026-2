@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect
 from cadastros.forms import ProdutoForm
+from django.contrib.admin.views.decorators import staff_member_required
+#from cadastros.decorators import login_obrigatorio_custom
 
+@staff_member_required(login_url='cadastros:home_dashboard')
 def cadastrar_produto(request):
     if request.method == 'POST':
         form = ProdutoForm(request.POST)

@@ -21,6 +21,7 @@ from cadastros import views as cadastro_views # precisamos importar o modulo
 urlpatterns = [
     path('admin/', admin.site.urls),
     # Tudo que acessar /cadastros/ será repassado para as rotas do nosso app
+    path('contas/', include('django.contrib.auth.urls')),
     path('cadastros/', include('cadastros.urls')), 
     path('', cadastro_views.home_dashboard, name='home')
 ]   

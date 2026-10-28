@@ -1,0 +1,11 @@
+asgiref==3.12.1
+asttokens==3.0.2
+colorama==0.4.6
+Django==6.1
+executing==2.2.1
+icecream==2.2.0
+pillow==12.3.0
+Pygments==2.21.0
+python-dotenv==1.2.3
+sqlparse==0.6.0
+tzdata==2026.3

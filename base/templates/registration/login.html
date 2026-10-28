@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block titulo %}Entrar - Sistema ERP{% endblock %}
+
+{% block conteudo_principal %}
+<div class="pagina__cabecalho">
+    <h1 class="pagina__titulo">Acesso ao Sistema</h1>
+</div>
+
+<form method="post" class="formulario" style="max-width: 400px; margin: 0 auto;">
+    {% csrf_token %}
+    
+    {% if form.errors %}
+    <div class="formulario__alerta">
+        <ul class="errorlist"><li>Usuário ou senha inválidos.</li></ul>
+    </div>
+    {% endif %}
+
+    <div class="formulario__grid" style="grid-template-columns: 1fr;">
+        <div class="grupo-campo">
+            <label class="campo__label" for="id_username">Usuário</label>
+            <input type="text" name="username" class="campo__input" id="id_username" required autofocus>
+        </div>
+
+        <div class="grupo-campo">
+            <label class="campo__label" for="id_password">Senha</label>
+            <input type="password" name="password" class="campo__input" id="id_password" required>
+        </div>
+    </div>
+
+    <div class="formulario__rodape">
+        <button type="submit" class="botao botao--primario" style="width: 100%; justify-content: center;">Acessar</button>
+    </div>
+</form>
+{% endblock %}

@@ -1,63 +1,59 @@
 <header class="topo">
-        <div class="topo__interno">
+    <div class="topo__interno">
 
-            {% comment %}
-                A forma "url ... as variavel" guarda a URL em vez de repetir a tag
-                duas vezes (no href e na comparação). Bônus: nessa forma o Django
-                não levanta NoReverseMatch se a rota não existir — a variável
-                apenas fica vazia.
-            {% endcomment %}
-            {% url 'home' as url_home %}
-            {% url 'cadastros:listagem_clientes' as url_clientes %}
-            
-            {# 1. Adicionamos a variável com a URL do nosso novo formulário #}
-            {% url 'cadastros:cadastrar_produto' as url_novo_produto %}
+        {% comment %}
+            A forma "url ... as variavel" guarda a URL em vez de repetir a tag
+            duas vezes (no href e na comparação).
+        {% endcomment %}
+        {% url 'home' as url_home %}
+        {% url 'cadastros:listagem_clientes' as url_clientes %}
+        {% url 'cadastros:cadastrar_produto' as url_novo_produto %}
 
-            <a class="marca" href="{{ url_home }}">
-                <span class="marca__simbolo" aria-hidden="true">ERP</span>
-                <span class="marca__nome">Gestão Industrial</span>
-            </a>
+        <a class="marca" href="{{ url_home }}">
+            <span class="marca__simbolo" aria-hidden="true">ERP</span>
+            <span class="marca__nome">Gestão Industrial</span>
+        </a>
 
-            <nav class="navegacao" aria-label="Navegação principal">
+        <nav class="navegacao" aria-label="Navegação principal">
+            {% if user.is_authenticated %}
                 <a class="navegacao__link {% if request.path == url_home %}esta-ativo{% endif %}" 
                    href="{{ url_home }}"
                    {% if request.path == url_home %}aria-current="page"{% endif %}>
                     Início
                 </a>
 
-                {% comment %}
-                    Marcar o item ativo comparando request.path depende do context
-                    processor django.template.context_processors.request, que já
-                    vem habilitado no settings.py padrão. A alternativa seria mandar
-                    uma variável "menu_ativo" de cada view — mais explícito, porém
-                    repetitivo em todas as views do sistema.
-                {% endcomment %}
-                <a class="navegacao__link {% if request.path == url_clientes %}esta-ativo{% endif %}"
-                   href="{{ url_clientes }}"
-                   {% if request.path == url_clientes %}aria-current="page"{% endif %}>
-                    Clientes
-                </a>
+                {% comment %} Menus visíveis apenas para perfil administrativo (staff) {% endcomment %}
+                {% if user.is_staff %}
+                    <a class="navegacao__link {% if request.path == url_clientes %}esta-ativo{% endif %}"
+                       href="{{ url_clientes }}"
+                       {% if request.path == url_clientes %}aria-current="page"{% endif %}>
+                        Clientes
+                    </a>
 
-                {# 2. Aplicamos a variável, a classe dinâmica e o aria-current ao link de produtos #}
-                <a class="navegacao__link {% if request.path == url_novo_produto %}esta-ativo{% endif %}" 
-                   href="{{ url_novo_produto }}"
-                   {% if request.path == url_novo_produto %}aria-current="page"{% endif %}>
-                    Novo Produto
-                </a>
+                    <a class="navegacao__link {% if request.path == url_novo_produto %}esta-ativo{% endif %}" 
+                       href="{{ url_novo_produto }}"
+                       {% if request.path == url_novo_produto %}aria-current="page"{% endif %}>
+                        Novo Produto
+                    </a>
+                {% endif %}
                 
                 <a class="navegacao__link" href="#">Pedidos</a>
-            </nav>
+            {% endif %}
+        </nav>
 
-            <div class="usuario">
-                {% comment %}
-                    Placeholder até o módulo de autenticação entrar. Depois trocar
-                    pelo nome vindo de request.user.
-                {% endcomment %}
-                <span class="usuario__avatar" aria-hidden="true">GA</span>
-                <span class="usuario__nome">Gabriel</span>
-                <a class="navegacao__link" href="#">Sair</a>
-            </div>
-
+        <div class="usuario">
+            {% if user.is_authenticated %}
+                <span class="usuario__avatar" aria-hidden="true">{{ user.username|make_list|first|upper }}</span>
+                <span class="usuario__nome">{{ user.username }}</span>
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="botao botao--neutro" style="padding: 0.3rem 0.6rem;">Sair</button>
+                </form>
+            {% else %}
+                <a href="{% url 'cadastros:registrar_cliente' %}" class="botao botao--neutro">Cadastre-se</a>
+                <a href="{% url 'login' %}" class="botao botao--primario">Entrar</a>
+            {% endif %}
         </div>
-    </header>
-    {# ===================== FIM DO HEADER ===================== #}
+    </div>
+</header>
+{# ===================== FIM DO HEADER ===================== #}

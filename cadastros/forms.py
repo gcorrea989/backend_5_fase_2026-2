@@ -1,4 +1,6 @@
 from django import forms
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from .models import Produto
 
@@ -91,3 +93,17 @@ class ProdutoForm(forms.ModelForm):
             )
             
         return cleaned_data
+
+
+#Criado o formulário RegistroClienteForm para padronizar o 
+#CSS do formulário de registro de clientes
+class RegistroClienteForm(UserCreationForm):
+    class Meta:
+        model = User
+        fields = ['username'] # Campos padrões. A senha já é incluída automaticamente.
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Aplica a classe CSS do ERP em todos os campos gerados
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'campo__input'

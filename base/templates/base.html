@@ -22,6 +22,16 @@
 </head>
 <body>
     {% include "partials/_header.html" %}
+
+    {% if messages %}
+        <div class="conteudo" style="padding-bottom: 0;">
+            {% for message in messages %}
+                <div class="formulario__alerta">
+                    <ul class="errorlist"><li>{{ message }}</li></ul>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
     
     <main class="conteudo">
         {% block conteudo_principal %}{% endblock %}

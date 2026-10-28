@@ -6,3 +6,4 @@ from .dashboard import home_dashboard
 from .clientes import listagem_clientes
 from .produtos import cadastrar_produto
 from .orm import demonstracao_orm
+from .cadastrar_clientes import registrar_cliente
