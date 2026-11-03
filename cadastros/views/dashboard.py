@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from cadastros.models import Categoria, Produto, Cliente
+from icecream import ic
 
 def home_dashboard(request):
     # Contamos apenas os ativos para os indicadores

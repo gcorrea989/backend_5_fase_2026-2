@@ -17,11 +17,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include  
 from cadastros import views as cadastro_views # precisamos importar o modulo
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     # Tudo que acessar /cadastros/ será repassado para as rotas do nosso app
     path('contas/', include('django.contrib.auth.urls')),
     path('cadastros/', include('cadastros.urls')), 
-    path('', cadastro_views.home_dashboard, name='home')
+    path('', cadastro_views.home_dashboard, name='home'),
+
+    # Rotas do Swagger
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]   

@@ -13,6 +13,8 @@ class ProdutoAdmin(admin.ModelAdmin):
     list_filter = ('categoria',)
     # Adiciona uma barra de pesquisa
     search_fields = ('nome',)
+    # Esta linha faz a mágica nativa no painel Admin do Django
+    prepopulated_fields = {'slug': ('nome',)}
 
 @admin.register(Cliente)
 class ClienteAdmin(admin.ModelAdmin):

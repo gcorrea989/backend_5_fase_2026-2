@@ -104,3 +104,26 @@
 </form>
 
 {% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // O Django gera automaticamente os IDs dos campos com o prefixo 'id_'
+        const inputNome = document.getElementById('id_nome');
+        const inputSlug = document.getElementById('id_slug');
+
+        if (inputNome && inputSlug) {
+            inputNome.addEventListener('input', function() {
+                let texto = inputNome.value;
+                
+                texto = texto.toLowerCase(); // Tudo minúsculo
+                texto = texto.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // Remove acentos
+                texto = texto.replace(/[^a-z0-9\s-]/g, ''); // Remove caracteres especiais
+                texto = texto.trim().replace(/[\s-]+/g, '-'); // Troca espaços por hífen
+                
+                inputSlug.value = texto;
+            });
+        }
+    });
+</script>
+{% endblock %}

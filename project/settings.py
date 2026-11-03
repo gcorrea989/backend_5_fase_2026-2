@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'cadastros',
+    'rest_framework',
+    'rest_framework.authtoken', # Sistema de tokens nativo
+    'drf_spectacular',          # Gerador do Swagger
 ]
 
 MIDDLEWARE = [
@@ -139,3 +142,17 @@ MAILERS = {
 
 LOGIN_REDIRECT_URL = 'home' 
 LOGOUT_REDIRECT_URL = 'home'
+
+# Configuração global da API
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API do ERP Gestão Industrial',
+    'DESCRIPTION': 'Documentação dos endpoints de consulta e criação de pedidos.',
+    'VERSION': '1.0.0',
+}

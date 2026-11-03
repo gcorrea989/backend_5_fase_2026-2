@@ -11,4 +11,8 @@ urlpatterns = [
     path('clientes/', views.listagem_clientes, name='listagem_clientes'),
     path('registro/', views.registrar_cliente, name='registrar_cliente'),
     path('produtos/novo/', views.cadastrar_produto, name='cadastrar_produto'),
+
+    # Rotas da API
+    path('api/produtos/', views.ProdutoListAPI.as_view(), name='api_produtos'),
+    path('api/pedidos/', views.PedidoCreateAPI.as_view(), name='api_pedidos'),
 ]
